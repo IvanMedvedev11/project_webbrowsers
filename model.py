@@ -23,3 +23,16 @@ class User:
         if self.cursor.fetchone() is None:
             return "Неверный логин или пароль"
         return "Вы успешно вошли"
+from selenium import webdriver
+
+from selenium.webdriver.chrome.options import Options
+
+data_dir = r'C:\Users\student\AppData\Local\Google\Chrome\User Data'
+options = Options()
+options.add_argument(f'--user-data-dir={data_dir}')
+options.add_argument('--profile-directory=Profile 2')
+options.add_argument("--disable-blink-features=AutomationControlled")
+options.add_experimental_option("excludeSwitches", ["enable-automation"])
+print(options.arguments)
+driver = webdriver.Chrome(options=options)
+driver.get("https://github.com/")
