@@ -20,13 +20,13 @@ class User:
         hash_password = hashlib.sha256(password.encode()).hexdigest()
         self.cursor.execute('''INSERT INTO Users(username, password) VALUES (?, ?)''', (username, hash_password))
         self.connection.commit()
-        return "Вы успешно зарегистрированы"
+        return True
     def sign_in(self, username, password):
         hash_password = hashlib.sha256(password.encode()).hexdigest()
         self.cursor.execute('''SELECT * FROM Users WHERE username = ? AND password = ?''', (username, hash_password))
         if self.cursor.fetchone() is None:
-            return "Неверный логин или пароль"
-        return "Вы успешно вошли"
+            return False
+        return True
 class PasswordGetter:
     def get_passwords(self):
         # Путь к данным Chrome
