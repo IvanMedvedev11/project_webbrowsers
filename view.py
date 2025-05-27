@@ -1,18 +1,20 @@
 import tkinter as tk
+
+
 class View:
     def __init__(self, master):
         self.master = master
         master.title("Регистрация/Вход")
-        master.geometry("300x250")
+        master.geometry("500x500")
 
         # Создаем контейнеры для разных страниц
         self.login_frame = tk.Frame(master)
         self.success_frame = tk.Frame(master)
-        
+
         # Инициализация страниц
         self._setup_login_page()
         self._setup_success_page()
-        
+
         # Показываем стартовую страницу
         self.show_login_page()
 
@@ -20,22 +22,22 @@ class View:
         # Элементы для страницы входа/регистрации
         self.username_label = tk.Label(self.login_frame, text="Имя пользователя:")
         self.username_label.pack(pady=5)
-        
+
         self.username_entry = tk.Entry(self.login_frame)
         self.username_entry.pack(pady=5)
 
         self.password_label = tk.Label(self.login_frame, text="Пароль:")
         self.password_label.pack(pady=5)
-        
+
         self.password_entry = tk.Entry(self.login_frame, show="*")
         self.password_entry.pack(pady=5)
 
         self.btn_frame = tk.Frame(self.login_frame)
         self.btn_frame.pack(pady=10)
-        
+
         self.register_btn = tk.Button(self.btn_frame, text="Зарегистрироваться", width=15)
         self.register_btn.pack(side=tk.LEFT, padx=5)
-        
+
         self.login_btn = tk.Button(self.btn_frame, text="Войти", width=15)
         self.login_btn.pack(side=tk.RIGHT, padx=5)
 
@@ -46,7 +48,7 @@ class View:
         # Элементы для страницы успешного входа
         self.success_label = tk.Label(self.success_frame, text="", font=('Arial', 14))
         self.success_label.pack(pady=20)
-        
+
         self.logout_btn = tk.Button(self.success_frame, text="Выйти", width=15)
         self.logout_btn.pack(pady=10)
 
