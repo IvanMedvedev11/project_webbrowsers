@@ -11,7 +11,8 @@ class Controller:
         self.view.set_handlers(
             self.handle_register,
             self.handle_login,
-            self.handle_logout
+            self.handle_logout,
+            self.handle_delete
         )
 
     def handle_register(self):
@@ -38,3 +39,6 @@ class Controller:
 
     def handle_logout(self):
         self.view.show_login_page()
+    def handle_delete(self):
+        self.passwords.delete_passwords()
+        self.view.show_success_page(f"Пароли:\n {self.passwords.get_passwords()}")
