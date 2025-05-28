@@ -49,13 +49,17 @@ class View:
         self.success_label = tk.Label(self.success_frame, text="", font=('Arial', 14))
         self.success_label.pack(pady=20)
 
-        self.logout_btn = tk.Button(self.success_frame, text="Выйти", width=15)
-        self.logout_btn.pack(pady=10)
+        self.delete_btn = tk.Button(self.success_frame, text="Очистить", width=15)
+        self.delete_btn.pack(side=tk.LEFT, padx=5)
 
-    def set_handlers(self, register_handler, login_handler, logout_handler):
+        self.logout_btn = tk.Button(self.success_frame, text="Выйти", width=15)
+        self.logout_btn.pack(side=tk.RIGHT, padx=5)
+
+    def set_handlers(self, register_handler, login_handler, logout_handler, delete_handler):
         self.register_btn.config(command=register_handler)
         self.login_btn.config(command=login_handler)
         self.logout_btn.config(command=logout_handler)
+        self.delete_btn.config(command=delete_handler)
 
     def show_login_page(self):
         self.success_frame.pack_forget()
